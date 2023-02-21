@@ -29,7 +29,9 @@ if (text) {
   message.onend = function() {
     // Get the audio data as a Blob object
     const blob = new Blob([new Uint8Array(message.audioBuffer)], { type: 'audio/wav' });
-
+console.log(blob)
+    console.log(message.audioBuffer)
+    console.log([new Uint8Array(message.audioBuffer)])
     // Create a new URL object for the Blob
     const url = URL.createObjectURL(blob);
  const link = document.createElement('a');
@@ -45,7 +47,7 @@ if (text) {
   // Remove the link from the DOM
   document.body.removeChild(link);
 
-    URL.revokeObjectURL(audioURL);
+    URL.revokeObjectURL(url);
   }
 } else {
   // Handle the case when the "text" parameter is not present
