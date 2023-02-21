@@ -28,7 +28,7 @@ if (text) {
   // Wait for the audio to finish generating
   message.onend = function() {
     // Get the audio data as a Blob object
-    const blob = new Blob([new Uint8Array(message.audioBuffer)]);
+    const blob = new Blob([new Uint8Array(message.audioBuffer)], { type: 'audio/wav' });
 
     // Create a new URL object for the Blob
     const url = URL.createObjectURL(blob);
