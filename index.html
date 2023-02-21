@@ -7,31 +7,34 @@
         const urlParams = new URLSearchParams(window.location.search);
         const text = urlParams.get('text');
         if (text) {
-                    // Create a new instance of SpeechSynthesisUtterance
-          var msg = new SpeechSynthesisUtterance('Hello world');
+           // Create a new instance of SpeechSynthesisUtterance
+var msg = new SpeechSynthesisUtterance('Hello world');
 
-          // Set up an event listener to capture the audio output
-          msg.addEventListener('end', function() {
-            var stream = new MediaStream();
-            stream.addTrack(this.audioStream.getAudioTracks()[0]);
+// Set up an event listener to capture the audio output
+msg.addEventListener('end', function() {
+  var context = new AudioContext();
+  var dest = context.createMediaStreamDestination();
+  var recorder = new MediaRecorder(dest.stream);
+  var chunks = [];
 
-            var recorder = new MediaRecorder(stream);
-            var chunks = [];
+  var source = context.createMediaElementSource(this.audio);
+  source.connect(dest);
 
-            recorder.ondataavailable = function(event) {
-              chunks.push(event.data);
-            }
+  recorder.ondataavailable = function(event) {
+    chunks.push(event.data);
+  }
 
-            recorder.onstop = function() {
-              var blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
-              // Do something with the recorded audio
-            }
+  recorder.onstop = function() {
+    var blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
+    // Do something with the recorded audio
+  }
 
-            recorder.start();
-          });
+  this.audio.play();
+  recorder.start();
+});
 
-          // Start the speech synthesis
-          window.speechSynthesis.speak(msg);
+// Start the speech synthesis
+window.speechSynthesis.speak(msg);
         }
       }
     </script>
