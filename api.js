@@ -11,22 +11,34 @@ for (var i = 0; i < voices.length; i++) {
   }
 }
 
-// Create a new instance of SpeechSynthesisUtterance
-// Get the URL queries
-const queryParams = new URLSearchParams(window.location.search);
+const text = request.body.text;
 
-// Extract the "text" query parameter
-const text = queryParams.get("text");
+// Create a new SpeechSynthesisUtterance object with the text
+const message = new SpeechSynthesisUtterance(text);
 
-// Check if the "text" parameter is present
-if (text) {
-  // Create a new SpeechSynthesisUtterance object with the text
-  const message = new SpeechSynthesisUtterance(text);
+// Set the audio output format to WAV
+message.voiceURI = 'native';
+message.lang = 'en-US';
+message.volume = 1;
+message.rate = 1;
+message.pitch = 1;
+message.text = text;
+message.outputFormat = 'audio/wav';
 
-  // Use the Web Speech API to speak the text
-  window.speechSynthesis.speak(message);
-} else {
-  // Handle the case when the "text" parameter is not present
-  console.error("No 'text' parameter found in the URL queries");
-}
+// Use the Web Speech API to generate the audio file
+window.speechSynthesis.speak(message);
+
+// Wait for the audio to be generated
+message.addEventListener('end', () => {
+  // Get the audio data as a blob
+  window.speechSynthesis.cancel();
+  const audioData = new Blob([new Uint8Array(message.audioContent)], {type: 'audio/wav'});
+
+  // Return the audio data as the HTTP response
+  response.writeHead(200, {
+    'Content-Type': 'audio/wav',
+    'Content-Length': audioData.size
+  });
+  response.end(audioData);
+});
 }
