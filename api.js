@@ -36,7 +36,6 @@ console.log(blob)
     const url = URL.createObjectURL(blob);
  const link = document.createElement('a');
   link.href = url;
-  link.download = 'speech.wav';
 
   // Append the link to the DOM
   document.body.appendChild(link);
@@ -46,8 +45,7 @@ console.log(blob)
 
   // Remove the link from the DOM
   document.body.removeChild(link);
-
-    URL.revokeObjectURL(url);
+    console.log(url)
   }
 } else {
   // Handle the case when the "text" parameter is not present
