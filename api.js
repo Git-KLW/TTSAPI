@@ -1,7 +1,6 @@
 window.speechSynthesis.onvoiceschanged = function() {
 
   // Get the value of the text input field
-  var text = document.getElementById('text-input').value;
   var voices = window.speechSynthesis.getVoices();
 // Find the voice you want to use
 var selectedVoice = null;
