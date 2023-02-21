@@ -3,27 +3,32 @@
   <head>
     <title>Speech Synthesis API</title>
     <script>
+      let voices = [];
+
+      function onVoicesChanged() {
+        voices = window.speechSynthesis.getVoices();
+      }
+
       function speak() {
         const urlParams = new URLSearchParams(window.location.search);
         const text = urlParams.get('text');
         if (text) {
           const msg = new SpeechSynthesisUtterance();
           msg.text = text;
-          window.speechSynthesis.speak(msg);
+          msg.voice = voices[0]; // use first available voice
           msg.onend = function(event) {
-            const blob = new Blob([new Uint8Array(URL.createObjectURL(event.target.getBlob()).split(',')[1])], {type: 'audio/mpeg'});
-            const reader = new FileReader();
-            reader.readAsDataURL(blob);
-            reader.onloadend = function() {
-              const dataURL = reader.result;
-              window.location.href = 'data:audio/mpeg;base64,' + dataURL.split(',')[1];
-            }
-          }
+            const blob = new Blob([msg.audio], { type: 'audio/wav' });
+            const url = URL.createObjectURL(blob);
+            window.location.href = url; // navigate to the audio file
+          };
+          window.speechSynthesis.speak(msg);
         }
       }
+
+      window.speechSynthesis.onvoiceschanged = onVoicesChanged;
     </script>
   </head>
   <body onload="speak()">
-    <p>Generating TTS audio...</p>
+    <p>Speaking: <span id="text"></span></p>
   </body>
 </html>
