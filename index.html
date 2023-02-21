@@ -10,11 +10,20 @@
           const msg = new SpeechSynthesisUtterance();
           msg.text = text;
           window.speechSynthesis.speak(msg);
+          msg.onend = function(event) {
+            const blob = new Blob([new Uint8Array(URL.createObjectURL(event.target.getBlob()).split(',')[1])], {type: 'audio/mpeg'});
+            const reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onloadend = function() {
+              const dataURL = reader.result;
+              window.location.href = 'data:audio/mpeg;base64,' + dataURL.split(',')[1];
+            }
+          }
         }
       }
     </script>
   </head>
   <body onload="speak()">
-    <p>Speaking: <span id="text"></span></p>
+    <p>Generating TTS audio...</p>
   </body>
 </html>
