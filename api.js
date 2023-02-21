@@ -22,35 +22,33 @@ if (text) {
   // Create a new SpeechSynthesisUtterance object with the text
   const message = new SpeechSynthesisUtterance(text);
 
-  // Use the Web Speech API to generate the audio data
-  window.speechSynthesis.speak(message);
+  // Use the Web Speech API to speak the text
+  const audio = new Audio();
+  audio.src = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(new SpeechSynthesisUtterance(text))], {type: 'text/xml'}));
+  audio.play();
 
- const audioContext = new AudioContext();
-const mediaStreamDestination = audioContext.createMediaStreamDestination();
-
-// Set the audioContext as the output for the SpeechSynthesisUtterance object
-message.audioContext = audioContext;
-
-// Connect the SpeechSynthesisUtterance object to the MediaStreamDestination
-message.connect(mediaStreamDestination);
-
-// Set up the MediaRecorder to record the TTS output as an MP3 file
-const chunks = [];
-const mediaRecorder = new MediaRecorder(mediaStreamDestination.stream);
-mediaRecorder.addEventListener("dataavailable", event => chunks.push(event.data));
-mediaRecorder.addEventListener("stop", () => {
-  const blob = new Blob(chunks, { type: "audio/mp3" });
-  const url = window.URL.createObjectURL(blob);
-  console.log(url);
-});
-
-// Start the MediaRecorder
-mediaRecorder.start();
-
-// Stop the MediaRecorder after the TTS output has finished
-message.addEventListener("end", () => {
-  mediaRecorder.stop();
-});
+  // Use the Web Audio API to capture the audio output
+  const audioCtx = new AudioContext();
+  const dest = audioCtx.createMediaStreamDestination();
+  const source = audioCtx.createMediaElementSource(audio);
+  source.connect(dest);
+  const chunks = [];
+  const recorder = new MediaRecorder(dest.stream);
+  recorder.ondataavailable = (e) => {
+    chunks.push(e.data);
+  };
+  recorder.onstop = (e) => {
+    const blob = new Blob(chunks, { type: 'audio/wav' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'output.wav';
+    link.click();
+  };
+  recorder.start();
+  setTimeout(() => {
+    recorder.stop();
+  }, message.duration * 1000);
 } else {
   // Handle the case when the "text" parameter is not present
   console.error("No 'text' parameter found in the URL queries");
