@@ -1,10 +1,4 @@
 window.speechSynthesis.onvoiceschanged = function() {
-var form = document.getElementById('tts-form');
-
-// Add a submit event listener to the form
-form.addEventListener('submit', function(event) {
-  // Prevent the default form submission behavior
-  event.preventDefault();
 
   // Get the value of the text input field
   var text = document.getElementById('text-input').value;
@@ -36,6 +30,4 @@ if (text) {
   // Handle the case when the "text" parameter is not present
   console.error("No 'text' parameter found in the URL queries");
 }
-
-})
 }
