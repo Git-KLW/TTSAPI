@@ -1,8 +1,20 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <script src="api.js"></script>
+  <head>
+    <title>Speech Synthesis API</title>
+    <script>
+      function speak() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const text = urlParams.get('text');
+        if (text) {
+          const msg = new SpeechSynthesisUtterance();
+          msg.text = text;
+          window.speechSynthesis.speak(msg);
+        }
+      }
+    </script>
   </head>
-<body>
+  <body onload="speak()">
+    <p>Speaking: <span id="text"></span></p>
   </body>
 </html>
