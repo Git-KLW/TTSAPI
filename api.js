@@ -41,7 +41,6 @@ console.log(blob)
   document.body.appendChild(link);
 
   // Trigger a click on the link to start the download
-  link.click();
 
   // Remove the link from the DOM
   document.body.removeChild(link);
