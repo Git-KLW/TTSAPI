@@ -25,8 +25,18 @@ if (text) {
   // Use the Web Speech API to generate the audio data
   window.speechSynthesis.speak(message);
 
-  const chunks = [];
-const mediaRecorder = new MediaRecorder(message);
+ const audioContext = new AudioContext();
+const mediaStreamDestination = audioContext.createMediaStreamDestination();
+
+// Set the audioContext as the output for the SpeechSynthesisUtterance object
+message.audioContext = audioContext;
+
+// Connect the SpeechSynthesisUtterance object to the MediaStreamDestination
+message.connect(mediaStreamDestination);
+
+// Set up the MediaRecorder to record the TTS output as an MP3 file
+const chunks = [];
+const mediaRecorder = new MediaRecorder(mediaStreamDestination.stream);
 mediaRecorder.addEventListener("dataavailable", event => chunks.push(event.data));
 mediaRecorder.addEventListener("stop", () => {
   const blob = new Blob(chunks, { type: "audio/mp3" });
