@@ -3,47 +3,40 @@
   <head>
     <title>Speech Synthesis API</title>
     <script>
-      let context;
-      let recorder;
-      let chunks = [];
-
       function speak() {
         const urlParams = new URLSearchParams(window.location.search);
         const text = urlParams.get('text');
         if (text) {
           const msg = new SpeechSynthesisUtterance();
           msg.text = text;
-          msg.rate = 1; // adjust the rate as needed
+          const audioContext = new AudioContext();
+          const audioDestination = audioContext.createMediaStreamDestination();
           msg.onend = () => {
-            recorder.stop();
+            audioContext.close();
+            const audioBlob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
+            const audioUrl = URL.createObjectURL(audioBlob);
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/save_audio', true);
+            xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+            xhr.responseType = 'blob';
+            xhr.onload = () => {
+              console.log(xhr.response);
+            };
+            xhr.send(audioBlob);
           };
-          const utterance = new SpeechSynthesisUtterance(text);
-          speechSynthesis.speak(utterance);
-          recorder.start();
+          const source = audioContext.createBufferSource();
+          const gainNode = audioContext.createGain();
+          source.buffer = audioContext.createBuffer(1, 1, audioContext.sampleRate);
+          source.connect(gainNode);
+          gainNode.connect(audioDestination);
+          gainNode.gain.value = 0; // Mute the output to avoid feedback
+          window.speechSynthesis.speak(msg);
+          source.start();
         }
-      }
-
-      function init() {
-        window.AudioContext = window.AudioContext || window.webkitAudioContext;
-        context = new AudioContext();
-        navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-          recorder = new MediaRecorder(stream);
-          recorder.ondataavailable = (event) => {
-            chunks.push(event.data);
-          };
-          recorder.onstop = () => {
-            const blob = new Blob(chunks, { type: 'audio/wav' });
-            const url = URL.createObjectURL(blob);
-            const audio = new Audio(url);
-            audio.controls = true;
-            document.getElementById('audio').appendChild(audio);
-          };
-        });
       }
     </script>
   </head>
-  <body onload="init(); speak()">
+  <body onload="speak()">
     <p>Speaking: <span id="text"></span></p>
-    <div id="audio"></div>
   </body>
 </html>
