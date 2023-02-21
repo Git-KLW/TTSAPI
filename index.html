@@ -3,37 +3,42 @@
   <head>
     <title>Speech Synthesis API</title>
     <script>
-      function speak() {
         const urlParams = new URLSearchParams(window.location.search);
         const text = urlParams.get('text');
-        if (text) {
-        var msg = new SpeechSynthesisUtterance('Hello world');
-const constraints = { audio: true };
-const chunks = [];
+        var msg = new SpeechSynthesisUtterance(text);
+let mediaRecorder;
+let recordedChunks = [];
 
-navigator.mediaDevices.getUserMedia(constraints)
-  .then(function(stream) {
-    const mediaRecorder = new MediaRecorder(stream);
-
-    mediaRecorder.ondataavailable = function(event) {
-      chunks.push(event.data);
-    }
-
-    mediaRecorder.onstop = function(event) {
-      const blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
-      // Do something with the audio blob, like send it to the server or play it back on the page
-    }
-
-    mediaRecorder.start();
-  })
-  .catch(function(err) {
-    console.log('The following error occurred: ' + err);
-  });
+const startRecording = () => {
+  navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(stream => {
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.addEventListener("dataavailable", event => {
+        if (event.data.size > 0) {
+          recordedChunks.push(event.data);
         }
-      }
+      });
+      mediaRecorder.start();
+    })
+    .catch(error => console.error(error));
+};
+
+const stopRecording = () => {
+  mediaRecorder.stop();
+};
+
+const downloadRecording = () => {
+  const blob = new Blob(recordedChunks, { type: "audio/webm" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "recording.webm";
+  a.click();
+  URL.revokeObjectURL(url);
+};
     </script>
   </head>
-  <body onload="speak()">
+  <body onload="">
     <p>Speaking: <span id="text"></span></p>
   </body>
 </html>
