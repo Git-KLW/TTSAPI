@@ -32,10 +32,9 @@ if (text) {
 
     // Create a new URL object for the Blob
     const url = URL.createObjectURL(blob);
-
+console.log(blob)
     // Send the URL as the response
     window.location.href = url;
-    console.log(blob)
   }
 } else {
   // Handle the case when the "text" parameter is not present
