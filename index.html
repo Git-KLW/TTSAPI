@@ -9,21 +9,21 @@
         if (text) {
           const msg = new SpeechSynthesisUtterance();
           msg.text = text;
-          msg.onend = function() {
-            const blob = new Blob([new DataView(msg.audioBuffer)], { type: 'audio/wav' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'tts.wav';
-            link.click();
-          };
-          window.speechSynthesis.speak(msg);
+          const synthesis = window.speechSynthesis;
+          synthesis.speak(msg);
+          msg.addEventListener('end', () => {
+            const audioBlob = new Blob([new Uint8Array(synthesis.getVoices()[0].audioBuffer)]);
+            const audioUrl = URL.createObjectURL(audioBlob);
+            const audio = document.createElement('audio');
+            audio.src = audioUrl;
+            audio.controls = true;
+            document.body.appendChild(audio);
+          });
         }
       }
     </script>
   </head>
   <body onload="speak()">
     <p>Speaking: <span id="text"></span></p>
-    <p><button onclick="speak()">Speak again</button></p>
   </body>
 </html>
