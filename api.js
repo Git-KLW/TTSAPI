@@ -35,6 +35,7 @@ if (text) {
 
     // Send the URL as the response
     window.location.href = url;
+    console.log(blob)
   }
 } else {
   // Handle the case when the "text" parameter is not present
