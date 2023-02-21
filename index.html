@@ -9,29 +9,13 @@
         if (text) {
           const msg = new SpeechSynthesisUtterance();
           msg.text = text;
-          const audioContext = new AudioContext();
-          const audioDestination = audioContext.createMediaStreamDestination();
-          msg.onend = () => {
-            audioContext.close();
-            const audioBlob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
-            const audioUrl = URL.createObjectURL(audioBlob);
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', '/save_audio', true);
-            xhr.setRequestHeader('Content-Type', 'application/octet-stream');
-            xhr.responseType = 'blob';
-            xhr.onload = () => {
-              console.log(xhr.response);
-            };
-            xhr.send(audioBlob);
-          };
-          const source = audioContext.createBufferSource();
-          const gainNode = audioContext.createGain();
-          source.buffer = audioContext.createBuffer(1, 1, audioContext.sampleRate);
-          source.connect(gainNode);
-          gainNode.connect(audioDestination);
-          gainNode.gain.value = 0; // Mute the output to avoid feedback
-          window.speechSynthesis.speak(msg);
-          source.start();
+          const synth = window.speechSynthesis;
+          synth.speak(msg);
+          msg.onend = function() {
+            const blob = new Blob([new Uint8Array(synth.getVoices()[0].synthesize(msg))], {type: 'audio/wav'});
+            const url = URL.createObjectURL(blob);
+            window.location.href = url;
+          }
         }
       }
     </script>
