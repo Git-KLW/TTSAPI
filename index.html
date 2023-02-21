@@ -7,33 +7,13 @@
         const urlParams = new URLSearchParams(window.location.search);
         const text = urlParams.get('text');
         if (text) {
-           // Create a new instance of SpeechSynthesisUtterance
-var msg = new SpeechSynthesisUtterance('Hello world');
-
-// Set up an event listener to capture the audio output
+        var msg = new SpeechSynthesisUtterance('Hello world');
 msg.addEventListener('end', function() {
-  var context = new AudioContext();
-  var dest = context.createMediaStreamDestination();
-  var recorder = new MediaRecorder(dest.stream);
-  var chunks = [];
-
-  var source = context.createMediaElementSource(this.audio);
-  source.connect(dest);
-
-  recorder.ondataavailable = function(event) {
-    chunks.push(event.data);
-  }
-
-  recorder.onstop = function() {
-    var blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
-    // Do something with the recorded audio
-  }
-
-  this.audio.play();
-  recorder.start();
+  var blob = new Blob([new Uint8Array(this.audioData)], { type: 'audio/ogg; codecs=opus' });
+  var url = window.URL.createObjectURL(blob);
+  var audio = new Audio(url);
+  audio.play();
 });
-
-// Start the speech synthesis
 window.speechSynthesis.speak(msg);
         }
       }
