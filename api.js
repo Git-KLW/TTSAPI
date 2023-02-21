@@ -32,9 +32,20 @@ if (text) {
 
     // Create a new URL object for the Blob
     const url = URL.createObjectURL(blob);
+ const link = document.createElement('a');
+  link.href = url;
+  link.download = 'speech.wav';
 
-    // Send the URL as the response
-    window.location.href = url;
+  // Append the link to the DOM
+  document.body.appendChild(link);
+
+  // Trigger a click on the link to start the download
+  link.click();
+
+  // Remove the link from the DOM
+  document.body.removeChild(link);
+
+    URL.revokeObjectURL(audioURL);
   }
 } else {
   // Handle the case when the "text" parameter is not present
