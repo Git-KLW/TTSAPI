@@ -22,36 +22,24 @@ if (text) {
   // Create a new SpeechSynthesisUtterance object with the text
   const message = new SpeechSynthesisUtterance(text);
 
-  // Use the Web Speech API to speak the text
-  const audio = new Audio();
-  audio.src = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(new SpeechSynthesisUtterance(text))], {type: 'text/xml'}));
-  audio.play();
+  // Use the Web Speech API to generate the audio data
+  window.speechSynthesis.speak(message);
 
-  // Use the Web Audio API to capture the audio output
-  const audioCtx = new AudioContext();
-  const dest = audioCtx.createMediaStreamDestination();
-  const source = audioCtx.createMediaElementSource(audio);
-  source.connect(dest);
-  const chunks = [];
-  const recorder = new MediaRecorder(dest.stream);
-  recorder.ondataavailable = (e) => {
-    chunks.push(e.data);
-  };
-  recorder.onstop = (e) => {
-    const blob = new Blob(chunks, { type: 'audio/wav' });
+  // Wait for the audio to finish generating
+  message.onend = function() {
+    // Get the audio data as a Blob object
+    const blob = new Blob([new Uint8Array(message.audioBuffer)]);
+
+    // Create a new URL object for the Blob
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'output.wav';
-    link.click();
-  };
-  recorder.start();
-  setTimeout(() => {
-    recorder.stop();
-  }, message.duration * 1000);
+
+    // Send the URL as the response
+    window.location.href = url;
+  }
 } else {
   // Handle the case when the "text" parameter is not present
   console.error("No 'text' parameter found in the URL queries");
 }
+
 
 }
